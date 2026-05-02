@@ -1,0 +1,12 @@
+.venv/
+.idea/
+__pycache__/
+*.pyc
+
+submissions/*.csv
+
+optuna_xg.py
+optuna_lightgbm.py
+
+.env
+.DS_Store
