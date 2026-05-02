@@ -1,6 +1,7 @@
 .venv/
 .idea/
 __pycache__/
+data_sets/
 *.pyc
 
 submissions/*.csv
