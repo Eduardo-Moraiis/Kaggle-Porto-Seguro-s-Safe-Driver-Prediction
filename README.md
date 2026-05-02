@@ -11,7 +11,7 @@ Este projeto tem como objetivo prever a probabilidade de um cliente registrar um
 - `data_sets/`: arquivos de treino e teste (não versionados)
 - `utils/`: arquivos JSON com parâmetros dos modelos
 - `submissions/`: arquivos de submissão gerados
-- `main.py`: script principal com pipeline de treino e stacking
+- `metalearning.py`: script principal com pipeline de treino e stacking
 
 ---
 
