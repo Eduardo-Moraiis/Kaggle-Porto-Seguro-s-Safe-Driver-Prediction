@@ -23,7 +23,7 @@ def optimize_logistic(X_stack, y):
     def objective(trial):
 
         params = {
-            "C": trial.suggest_float("C", 0.01, 3.0, log=True),
+            "C": trial.suggest_float("C", 0.01, 12, log=True),
             "solver": "lbfgs",
             "max_iter": 1000
         }

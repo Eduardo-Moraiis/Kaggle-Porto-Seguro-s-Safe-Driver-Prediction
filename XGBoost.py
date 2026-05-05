@@ -39,7 +39,7 @@ def objective(trial, X, y):
 
     model = XGBClassifier(**params)
 
-    scores = cross_validate(model, X, y, scoring=['roc_auc'], cv=5, n_jobs=-1)
+    scores = cross_validate(model, X, y, scoring=['roc_auc'], cv=10, n_jobs=-1)
 
     gini_mean = 2 * scores['test_roc_auc'].mean() - 1
 
@@ -77,7 +77,7 @@ def boruta_selection(model, X, y):
     return selected_features
 
 def evaluate_model(model, X, y):
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
     scores = cross_validate(
         model,

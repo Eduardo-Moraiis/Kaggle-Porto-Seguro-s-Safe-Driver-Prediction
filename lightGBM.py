@@ -112,7 +112,7 @@ def main():
             model,
             X,
             y,
-            cv=5,
+            cv=10,
             scoring=['roc_auc'],
             n_jobs=-1
         )

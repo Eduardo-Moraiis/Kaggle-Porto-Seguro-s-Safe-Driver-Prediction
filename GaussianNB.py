@@ -53,7 +53,7 @@ def objective(trial, X, y):
         model,
         X,
         y,
-        cv=5,
+        cv=10,
         scoring=["roc_auc"],
         n_jobs=-1
     )
@@ -98,7 +98,7 @@ def main():
             model,
             X,
             y,
-            cv=5,
+            cv=10,
             scoring=["roc_auc"],
             n_jobs=-1
         )
@@ -134,7 +134,7 @@ def main():
             model,
             X_sel,
             y,
-            cv=5,
+            cv=10,
             scoring=["roc_auc"],
             n_jobs=-1
         )
