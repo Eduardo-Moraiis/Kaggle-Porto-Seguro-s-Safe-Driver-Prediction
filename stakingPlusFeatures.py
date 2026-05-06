@@ -9,6 +9,8 @@ from sklearn.preprocessing import StandardScaler
 
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
+from pathlib import Path
+
 from sklearn.linear_model import LogisticRegression
 
 import optuna
@@ -19,39 +21,39 @@ RANDOM_STATE = 42
 def gini(y_true, y_pred):
     return 2 * roc_auc_score(y_true, y_pred) - 1
 
-
-def optimize_logistic(X_stack, y):
-
-    def objective(trial):
-
-        params = {
-            "C": trial.suggest_float("C", 0.01, 3.0, log=True),
-            "solver": "lbfgs",
-            "max_iter": 1000
-        }
-
-        skf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_STATE)
-        oof_pred = np.zeros(X_stack.shape[0])
-
-        for train_idx, valid_idx in skf.split(X_stack, y):
-
-            X_tr, X_val = X_stack[train_idx], X_stack[valid_idx]
-            y_tr, y_val = y.iloc[train_idx], y.iloc[valid_idx]
-
-            model = LogisticRegression(**params)
-            model.fit(X_tr, y_tr)
-
-            oof_pred[valid_idx] = model.predict_proba(X_val)[:, 1]
-
-        return gini(y, oof_pred)
-
-    study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=30)
-
-    print("\nMelhor params Logistic:")
-    print(study.best_params)
-
-    return study.best_params
+#Depreced
+# def optimize_logistic(X_stack, y):
+#
+#     def objective(trial):
+#
+#         params = {
+#             "C": trial.suggest_float("C", 0.01, 3.0, log=True),
+#             "solver": "lbfgs",
+#             "max_iter": 1000
+#         }
+#
+#         skf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_STATE)
+#         oof_pred = np.zeros(X_stack.shape[0])
+#
+#         for train_idx, valid_idx in skf.split(X_stack, y):
+#
+#             X_tr, X_val = X_stack[train_idx], X_stack[valid_idx]
+#             y_tr, y_val = y.iloc[train_idx], y.iloc[valid_idx]
+#
+#             model = LogisticRegression(**params)
+#             model.fit(X_tr, y_tr)
+#
+#             oof_pred[valid_idx] = model.predict_proba(X_val)[:, 1]
+#
+#         return gini(y, oof_pred)
+#
+#     study = optuna.create_study(direction="maximize")
+#     study.optimize(objective, n_trials=30)
+#
+#     print("\nMelhor params Logistic:")
+#     print(study.best_params)
+#
+#     return study.best_params
 
 
 def load_configs():
@@ -153,8 +155,8 @@ def stacking(X, y, X_test, xgb_config, lgb_config, gnb_config):
 
     print("Normalização concluída")
 
-    print("\nRodando Optuna para Logistic...")
-    best_params = optimize_logistic(X_stack, y)
+    # print("\nRodando Optuna para Logistic...")
+    # best_params = optimize_logistic(X_stack, y)
 
     skf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_STATE)
 
@@ -167,11 +169,7 @@ def stacking(X, y, X_test, xgb_config, lgb_config, gnb_config):
         X_tr, X_val = X_stack[train_idx], X_stack[valid_idx]
         y_tr, y_val = y.iloc[train_idx], y.iloc[valid_idx]
 
-        meta_model = LogisticRegression(
-            **best_params,
-            solver="lbfgs",
-            max_iter=1000
-        )
+        meta_model = LGBMClassifier(**lgb_config["best_params"])
 
         meta_model.fit(X_tr, y_tr)
 
@@ -202,6 +200,8 @@ def main():
 
     print("\nGerando submissão...")
     df_test["target"] = y_pred
+    path = Path("submissions")
+    path.mkdir(parents=True, exist_ok=True)
     df_test[["id", "target"]].to_csv("submissions/submission_stackingPlusFeatures_final.csv", index=False)
 
     print("\nSubmissão gerada com sucesso")

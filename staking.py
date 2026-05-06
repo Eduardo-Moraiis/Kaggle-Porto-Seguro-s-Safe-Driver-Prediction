@@ -9,6 +9,8 @@ from sklearn.naive_bayes import GaussianNB
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 from sklearn.linear_model import LogisticRegression
+from pathlib import Path
+
 
 import optuna
 
@@ -23,7 +25,7 @@ def optimize_logistic(X_stack, y):
     def objective(trial):
 
         params = {
-            "C": trial.suggest_float("C", 0.01, 12, log=True),
+            "C": trial.suggest_float("C", 0.01, 6, log=True),
             "solver": "lbfgs",
             "max_iter": 1000
         }
@@ -46,7 +48,7 @@ def optimize_logistic(X_stack, y):
         return gini(y, oof_pred)
 
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=30)
+    study.optimize(objective, n_trials=50)
 
     print("\nMelhor params Logistic:")
     print(study.best_params)
@@ -185,6 +187,8 @@ def main():
     y_pred = stacking(X, y, X_test, xgb_config, lgb_config, gnb_config)
 
     df_test["target"] = y_pred
+    path = Path("submissions")
+    path.mkdir(parents=True, exist_ok=True)
     df_test[["id", "target"]].to_csv("submissions/submission_stacking_final.csv", index=False)
 
     print("\nSubmissão gerada com sucesso")

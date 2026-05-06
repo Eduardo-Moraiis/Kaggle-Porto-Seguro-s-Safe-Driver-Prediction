@@ -4,9 +4,12 @@ import json
 import optuna
 import lightgbm as lgb
 
+
 from lightgbm import LGBMClassifier
 from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.metrics import roc_auc_score
+from pathlib import Path
+
 
 def gini_normalized(auc):
     return 2 * auc.mean() - 1
@@ -122,6 +125,8 @@ def main():
         print(f"\nGini CV: {gini_score:.6f}")
 
         print("\nSalvando configuração...")
+        path = Path("utils")
+        path.mkdir(parents=True, exist_ok=True)
         with open("utils/best_params_lgb.json", "w") as f:
             json.dump({
                 "best_params": best_params,
@@ -152,6 +157,8 @@ def main():
         y_pred = model.predict_proba(X_kaggle)[:, 1]
 
         df_test["target"] = y_pred
+        path = Path("submissions")
+        path.mkdir(parents=True, exist_ok=True)
         df_test[["id", "target"]].to_csv(
             "submissions/solucao_tp1_lgb_completa_2026.csv",
             index=False

@@ -7,6 +7,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.metrics import roc_auc_score
 from boruta import BorutaPy
+from pathlib import Path
+
 
 def gini_normalized(auc):
     return 2 * auc.mean() - 1
@@ -108,6 +110,8 @@ def main():
         print(f"\nGini final: {gini:.6f}")
 
         print("\nSalvando config...")
+        path = Path("utils")
+        path.mkdir(parents=True, exist_ok=True)
         with open("utils/gnb_config.json", "w") as f:
             json.dump({
                 "best_params": best_params,
@@ -144,6 +148,8 @@ def main():
         print(f"\nGini final: {gini:.6f}")
 
         print("\nSalvando config...")
+        path = Path("utils")
+        path.mkdir(parents=True, exist_ok=True)
         with open("utils/gnb_config.json", "w") as f:
             json.dump({
                 "best_params": best_params,
@@ -179,6 +185,8 @@ def main():
         y_pred = model.predict_proba(X_kaggle)[:, 1]
 
         df_test["target"] = y_pred
+        path = Path("submissions")
+        path.mkdir(parents=True, exist_ok=True)
         df_test[["id", "target"]].to_csv(
             "submissions/solucao_tp1_gnb_completa_2026.csv",
             index=False

@@ -6,10 +6,10 @@ import numpy as np
 from sklearn.model_selection import cross_validate, StratifiedKFold
 from xgboost import XGBClassifier
 from boruta import BorutaPy
-import shap
-import optuna_xg
 import optuna
 import json
+from pathlib import Path
+
 
 def objective(trial, X, y):
     params = {
@@ -138,6 +138,8 @@ def main():
         })
 
         print("\nSalvando configuração...")
+        path = Path("utils")
+        path.mkdir(parents=True, exist_ok=True)
         with open("utils/xg_config.json", "w") as f:
             json.dump({
                 "best_params": best_params,
@@ -177,9 +179,11 @@ def main():
         y_pred = model.predict_proba(X_kaggle)[:, 1]
 
         df_test["target"] = y_pred
+        path = Path("submissions")
+        path.mkdir(parents=True, exist_ok=True)
         df_test[["id", "target"]].to_csv("submissions/solucao_tp1_xg_completa_2026.csv", index=False)
 
-        print("\nArquivo solucao_tp1_2026.csv gerado com sucesso")
+        print("\nArquivo solucao_tp1_xg_completa_2026.csv gerado com sucesso")
 
     else:
         print("Opção inválida!")
