@@ -2,74 +2,101 @@
 
 ## Descrição
 
-Este projeto tem como objetivo prever a probabilidade de um cliente registrar um sinistro de seguro automotivo, utilizando técnicas de machine learning. A métrica de avaliação utilizada é o coeficiente de Gini.
+Este projeto tem como objetivo prever a probabilidade de um cliente registrar um sinistro de seguro automotivo no próximo ano, utilizando técnicas de machine learning.
+
+O problema faz parte de uma competição do Kaggle proposta pela Porto Seguro, onde previsões mais precisas permitem ajustar melhor os preços dos seguros, tornando-os mais justos para os clientes.
+
+A métrica de avaliação utilizada é o **Gini Normalizado**, diretamente relacionada à AUC:
+
+Gini = 2 * AUC - 1
 
 ---
 
-## Estrutura do Projeto
+## Abordagem
 
-- `data_sets/`: arquivos de treino e teste (não versionados)
-- `utils/`: arquivos JSON com parâmetros dos modelos
-- `submissions/`: arquivos de submissão gerados
-- `metalearning.py`: script principal com pipeline de treino e stacking
+A solução utiliza **ensemble learning**, combinando diferentes modelos para capturar padrões complementares nos dados.
 
----
+### Modelos Base
 
-## Modelos Utilizados
+* **XGBoost**
+* **LightGBM**
+* **Gaussian Naive Bayes**
 
-Foram utilizados três modelos base:
+Cada modelo contribui de forma diferente:
 
-- XGBoost
-- LightGBM
-- Gaussian Naive Bayes
-
-Cada modelo pode utilizar:
-- conjunto completo de features
-- subconjunto selecionado de features (definido nos arquivos JSON)
+* XGBoost: robusto e conservador
+* LightGBM: mais agressivo, captura padrões complexos
+* GaussianNB: modelo probabilístico, aumenta diversidade
 
 ---
 
 ## Stacking
 
-O projeto utiliza uma abordagem de stacking, que consiste em combinar múltiplos modelos para melhorar o desempenho final.
+O projeto utiliza **stacking (empilhamento)** para combinar os modelos.
 
-### Como funciona
+### Pipeline
 
-1. Os modelos base (XGB, LGB, NB) são treinados utilizando validação cruzada.
-2. São geradas previsões out-of-fold (OOF) para cada modelo.
-3. Essas previsões são utilizadas como novas features.
-4. Um modelo meta (Logistic Regression) é treinado sobre essas novas features.
-5. O modelo final combina os outputs dos modelos base.
+1. Treinamento dos modelos base com validação cruzada estratificada
+2. Geração de previsões **Out-of-Fold (OOF)**
+3. Uso das previsões como novas features
+4. Treinamento de um **meta-modelo (Logistic Regression)**
+5. Geração da predição final
 
-### Vantagens
+### Por que funciona?
 
-- Redução de overfitting
-- Combinação de diferentes padrões aprendidos pelos modelos
-- Melhora da performance final
+O stacking permite que um modelo aprenda:
+
+* quando confiar mais em cada modelo base
+* como corrigir erros individuais
+* como combinar diferentes padrões aprendidos
 
 ---
 
 ## Otimização
 
-- Os parâmetros dos modelos base armazenados nos arquivos JSON foram previamente obtidos por meio da otimização individual de cada modelo.
-- O modelo meta (Logistic Regression) é otimizado com Optuna.
-- A otimização é feita com validação cruzada estratificada.
+* **Optuna** para busca de hiperparâmetros
+* **Seleção de features** (quando aplicável)
+* Validação cruzada estratificada em todas as etapas
 
 ---
 
 ## Resultados
 
-### Gini dos Modelos Base (OOF)
+### Modelos Base (OOF)
 
-| Modelo        | Gini Normalizado |
-|--------------|------------------|
-| XGBoost      | 0.28629          |
-| LightGBM     | 0.28392          |
-| GaussianNB   | 0.23534          |
+| Modelo     | Gini    |
+| ---------- | ------- |
+| XGBoost    | 0.28629 |
+| LightGBM   | 0.28392 |
+| GaussianNB | 0.23534 |
 
 ### Stacking
 
-| Métrica              | Valor    |
-|---------------------|---------|
-| Gini (OOF)          | 0.28683 |
-| Kaggle (Public LB)  | 0.28126 |
+| Métrica            | Valor   |
+| ------------------ | ------- |
+| Gini (OOF)         | 0.28683 |
+| Kaggle (Public LB) | 0.28126 |
+
+---
+
+## Benchmark da Competição
+
+Melhor solução no Kaggle:
+
+* **Gini: 0.29698**
+
+O resultado obtido neste projeto é competitivo e próximo ao topo, considerando uma abordagem relativamente simples e bem estruturada.
+
+---
+
+## Considerações Finais
+
+Este projeto evidencia a força de técnicas de ensemble em problemas tabulares.
+
+Ao invés de focar apenas em um modelo, a combinação estratégica de múltiplos algoritmos permite:
+
+* melhor generalização
+* maior robustez
+* ganhos consistentes de performance
+
+Em problemas reais, essa abordagem costuma ser mais eficaz do que ajustes isolados em modelos individuais.
